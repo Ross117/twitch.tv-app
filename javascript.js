@@ -1,33 +1,52 @@
 $(window).on("load", () => {
  "use strict";
 
-  let $fccStatus = $(".fccStatus");
+    let users = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
+    let $userContainer = $(".userContainer");
+    let link = "";
 
-//call to twitchtv API
-  $.ajax({
-    // use a proxy server to prevent CORS error
-    url: "https://thingproxy.freeboard.io/fetch/https://wind-bow.gomix.me/twitch-api/streams/freecodecamp",
-    success: (json) => {
-      if (json.stream === null) {
-        $fccStatus.html("is not currently streaming.");
-      } else {
-        $fccStatus.html("is currently streaming.");
-      }
-      getFCCChannelLink();
-    },
-    error: () => {
-      $fccStatus.text("Sorry, something went wrong.");
-    }
-  });
+//  create a loading screen for when page is loading?
+
+//  for each item in the users array, make a call to the twitch.tv API to get the link to the user's twitch.tv channel
+    users.map( (val) => {
+
+      $.ajax({
+//      use a proxy server to prevent CORS error
+        url: "https://thingproxy.freeboard.io/fetch/https://wind-bow.gomix.me/twitch-api/channels/" + val,
+        success: (json) => {
+          link = json.url;
+          $userContainer.append("<div class=" + val + "><p><a href=" + link + ">" + val + "</a></p></div>");
+//        call function to check if user is currently streaming
+          checkStreamStatus(val);
+        },
+        error: () => {
+          $userContainer.append("<div><p>Sorry, something went wrong when we tried to get data about " + val + ".</p></div>");
+        }
+      });
+
+    });
 
 });
 
-// get link to FCC twitch channel
-function getFCCChannelLink () {
+// make a call to the twitch.tv API to check whether a given user is currently streaming
+function checkStreamStatus (user) {
   "use strict";
 
-  $.getJSON("https://thingproxy.freeboard.io/fetch/https://wind-bow.gomix.me/twitch-api/channels/freecodecamp", (json) => {
-    $(".fccStatus").html("<a href=" + json.url + ">Free Code Camp</a> " + $(".fccStatus").text());
+  let $userDiv = $("." + user);
+
+  $.ajax({
+    // use a proxy server to prevent CORS error
+    url: "https://thingproxy.freeboard.io/fetch/https://wind-bow.gomix.me/twitch-api/streams/" + user,
+    success: (json) => {
+      if (json.stream === null) {
+        $userDiv.append("<p>Not currently streaming.</p>");
+      } else {
+        $userDiv.append("<p>Currently streaming.</p>");
+      }
+    },
+    error: () => {
+      $userDiv.append("<p>Sorry, something went wrong when we tried to get data about this user.</p>");
+    }
   });
 
-};
+}
