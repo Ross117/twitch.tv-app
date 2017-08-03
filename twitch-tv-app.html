@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="style.css">
   <title>Twitchtv App</title>
 </head>
@@ -12,11 +13,20 @@
 
   <div class="container-fluid">
 
-    <h1>Twitch.tv App</h1>
+    <h1 class="text-center">Twitch.tv App</h1>
+    <h3 class="text-center"><em>Who's currently streaming on Twitch.tv?</em></h3>
 
-    <h3><em>Who's currently streaming on Twitch.tv?</em></h3>
+    <br>
 
-    <br><br>
+    <div class="row">
+      <div class="mx-auto">
+        <button type="button" class="refresh btn btn-primary">
+          <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
+        </button>
+      </div>
+    </div>
+
+    <br>
 
     <div class="row">
       <div class="mx-auto">
