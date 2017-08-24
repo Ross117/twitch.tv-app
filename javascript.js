@@ -1,55 +1,70 @@
 $(window).on("load", () => {
  "use strict";
 
-    const users = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp",
-      "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
-    const $userContainer = $(".userContainer");
-    let link = "";
-    let img = "";
-    let html = "";
+  const users = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp",
+    "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
+  let promisesArr = [];
+  const $userContainer = $(".userContainer");
 
-    // for each item in the users array, make a call to the twitch.tv API to
-   // get the link to the user's twitch.tv channel and the channel logo
-    users.map( (user) => {
+  users.map( (user) => {
+    // for each user, create a promise consisting of a call to the twitch.tv
+    // API to get data about the user. Push the promises into an array.
+    promisesArr.push(new Promise ((resolve, reject) => {
       $.ajax({
         // use a proxy server to prevent CORS error
         url: "https://thingproxy.freeboard.io/fetch/https://" +
           "wind-bow.gomix.me/twitch-api/channels/" + user,
-        success: (json) => {
-          link = json.url;
-          img = json.logo;
-          html = buildProfileHTML(user, img, link);
-          // append API data to the document in an individual container
-          $userContainer.append(html);
-          // call function to check if user is currently streaming
-          checkStreamStatus(user);
-        },
-        error: () => {
-          $userContainer.append("<div><p>Sorry, something went wrong" +
-            " when we tried to get data about " + user + ".</p></div>");
-        }
+        success: resolve,
+        error: reject
       });
-    });
+    }));
+  });
+
+  // wait until all the API calls have returned, then, for each user, append
+  // the returned data to the document we need to wait until all the API calls
+  // have been returned to ensure that the users are appended
+  // to the doument in the same order each time
+  Promise.all(promisesArr).then( values => {
+    let i = 0;
+    let username = "";
+    let link = "";
+    let img = "";
+    let html = "";
+    const $userContainer = $(".userContainer");
+
+    for (i = 0; i < promisesArr.length; i++) {
+      username = values[i].display_name;
+      link = values[i].url;
+      img = values[i].logo;
+      html = buildProfileHTML(username, img, link);
+      $userContainer.append(html);
+      checkStreamStatus(username);
+    }
+  })
+    .catch( () => {
+    $userContainer.append("<div><p>Sorry, something went wrong" +
+      " when we tried to get data from Twitch.tv. Please try again later" +
+      ".</p></div>");
+  });
+
 });
 
 // return a string which can be appended to the HTML document in order to
 // build the user's profile
-function buildProfileHTML (user, img, link) {
+function buildProfileHTML (username, img, link) {
   "use strict";
 
   const statusBox = "<span class='streamStatus'>" +
     "<i class='fa fa-circle' aria-hidden='true'></i></span>";
 
-  // link should open in new window?
-  const html = "<div class='" + user + " userBox'>" + statusBox
-      + "<p><img src=" + img + " alt='' class='img-responsive'><a href="
-      + link + ">" + user + "</a></p></div>";
+  const html = "<div class='" + username + " userBox'>" + statusBox +
+      "<p><img src=" + img + " alt='(Image not available)'" +
+      " class='img-responsive'><a href=" + link + ">" + username +
+      "</a></p></div>";
 
   return html;
 }
 
-// make a call to the twitch.tv API to check whether a given user is currently
-// streaming. If they are streaming, get details about the stream.
 function checkStreamStatus (user) {
   "use strict";
 
@@ -61,6 +76,8 @@ function checkStreamStatus (user) {
     let status = "";
     let viewers = 0;
 
+    // make a call to the twitch.tv API to check whether a given user is
+    // currently streaming. If they are streaming, get details about the stream.
     $.ajax({
       // use a proxy server to prevent CORS error
       url: "https://thingproxy.freeboard.io/fetch/https://" +
@@ -95,12 +112,12 @@ function buildStatusHTML (game, status, viewers) {
   let html = "";
 
   if (game === null || game === undefined) {
-    html = "<p>Currently streaming.</p><p><b>Status:</b> " + status
-       + ";  <b>Viewers:</b> " + viewers + "</p>";
+    html = "<p>Currently streaming.</p><p><b>Status:</b> " + status +
+       ";  <b>Viewers:</b> " + viewers + "</p>";
   } else {
     html = "<p>Currently streaming.</p><p><b>Game:</b> " + game +
-      ";  <b>Status:</b> " + status + ";  <b>Viewers:</b> "
-       + viewers + "</p>";
+      ";  <b>Status:</b> " + status + ";  <b>Viewers:</b> " +
+      viewers + "</p>";
   }
 
   return html;
