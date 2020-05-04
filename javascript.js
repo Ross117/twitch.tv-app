@@ -12,7 +12,7 @@ $(window).on("load", () => {
     promisesArr.push(new Promise ((resolve, reject) => {
       $.ajax({
         // use a proxy server to prevent CORS error
-        url: "https://thingproxy.freeboard.io/fetch/https://" +
+        url: "https://cors-anywhere.herokuapp.com/" +
           "wind-bow.gomix.me/twitch-api/channels/" + user,
         success: resolve,
         error: reject
@@ -80,7 +80,7 @@ function checkStreamStatus (user) {
     // currently streaming. If they are streaming, get details about the stream.
     $.ajax({
       // use a proxy server to prevent CORS error
-      url: "https://thingproxy.freeboard.io/fetch/https://" +
+      url: "https://cors-anywhere.herokuapp.com/" +
         "wind-bow.gomix.me/twitch-api/streams/" + user,
       success: (json) => {
         if (json.stream === null) {
